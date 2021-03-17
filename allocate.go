@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -224,8 +225,12 @@ func (a *ExecAllocator) Allocate(ctx context.Context, opts ...BrowserOption) (*B
 		wsURL, err = readOutput(stdout, a.combinedOutputWriter, a.wg.Done)
 		wsURLChan <- struct{}{}
 	}()
+
+	startAt := time.Now()
+
 	select {
 	case <-wsURLChan:
+		log.Printf("Chrome started in %s", time.Now().Sub(startAt))
 	case <-time.After(wsURLReadTimeout):
 		err = errors.New("websocket url timeout reached")
 	}
